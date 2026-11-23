@@ -171,8 +171,14 @@ if (actualTokens !== undefined) {
       continue;
     }
 
-    const oldestTimestamp = this.requestHistory[0].timestamp;
-    const expiresAt = oldestTimestamp + 60_000;
+    const oldestRequest = this.requestHistory[0];
+
+if (!oldestRequest) {
+  await new Promise(resolve => setTimeout(resolve, 100));
+  continue;
+}
+
+const expiresAt = oldestRequest.timestamp + 60_000;
     const waitTime = Math.min(
       5_000,
       Math.max(100, expiresAt - Date.now() + 100)

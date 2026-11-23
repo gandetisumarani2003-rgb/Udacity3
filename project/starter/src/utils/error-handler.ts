@@ -114,24 +114,26 @@ export async function withTimeout<T>(
   timeoutMs: number,
   errorMessage: string = 'Operation timed out'
 ): Promise<T> {
-  let timeoutId: ReturnType<typeof setTimeout>;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
-      reject(new ReviewError(
-        errorMessage,
-        ErrorCodes.AGENT_TIMEOUT,
-        { timeoutMs }
-      ));
+      reject(
+        new ReviewError(errorMessage, ErrorCodes.AGENT_TIMEOUT, { timeoutMs })
+      );
     }, timeoutMs);
   });
 
   try {
     return await Promise.race([fn(), timeoutPromise]);
   } finally {
-    clearTimeout(timeoutId);
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
   }
 }
+
+
 
 /**
  * Check if an error is a ReviewError
